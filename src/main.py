@@ -58,6 +58,31 @@ class Player:
             'Points': 0, 'Rebounds': 0, 
             'Assists': 0, 'Steals': 0
         }
+        self.games_played = 0
+    
+    # Method to increment games played
+    def play_game(self, points=0, rebounds=0, assists=0, steals=0):
+        self.games_played += 1
+        self.add_points(points)
+        self.add_rebounds(rebounds)
+        self.add_assists(assists)
+        self.add_steals(steals)
+    
+    # Per Game Stats Calculations
+    @property
+    def points_per_game(self):
+        return self.stats['Points'] / self.games_played if self.games_played > 0 else 0
+    
+    @property
+    def rebounds_per_game(self):
+        return self.stats['Rebounds'] / self.games_played if self.games_played > 0 else 0
+    
+    @property
+    def assists_per_game(self):
+        return self.stats['Assists'] / self.games_played if self.games_played > 0 else 0
+    @property
+    def steals_per_game(self):
+        return self.stats['Steals'] / self.games_played if self.games_played > 0 else 0
 
     # GETTERS
     
