@@ -1,6 +1,6 @@
 # --------------- Player Class -------------
 class Player:
-    def __init__(self, name, height, position, current_stats=None):
+    def __init__(self, name, height, position, current_stats=None, games=0):
         self._name = name
         self._height = height
         self._position = position
@@ -8,6 +8,7 @@ class Player:
             'Points': 0, 'Rebounds': 0, 
             'Assists': 0, 'Steals': 0
         }
+        self.games_played = games
 
     # properties of a given player (instead of getters)
     @property
@@ -194,14 +195,14 @@ class Game:
         
         # Simulate scoring for team 1
         for player in self.team1.players:
-            # Weighted random points based on team strength
-            points_scored = max(10, random.randint(int(strength1 * 0.8), int(strength1 * 1.2)))
+            base_score = 25  # You can adjust this base score as needed
+            points_scored = max(0, int((player.points_per_game or base_score) * random.uniform(0.8, 1.2)))
             self.score1 += points_scored
             player.add_points(points_scored)
         
         # Simulate scoring for team 2
         for player in self.team2.players:
-            points_scored = max(10, random.randint(int(strength2 * 0.8), int(strength2 * 1.2)))
+            points_scored = max(0, int((player.points_per_game or base_score) * random.uniform(0.8, 1.2)))
             self.score2 += points_scored
             player.add_points(points_scored)    
 
@@ -226,3 +227,58 @@ class Game:
 
     def get_final_score(self):
         return f"{self.team1.team_name}: {self.score1}, {self.team2.team_name}: {self.score2}"
+
+
+    ## Testing Celtics vs Bucks
+# Creating players
+tatum = Player("Tatum", "6'5", "SF")
+brown = Player("Brown", "6'6", "SG")
+smart = Player("Smart", "6'4", "PG")
+horford = Player("Horford", "6'10", "C")
+white = Player("White", "6'4", "PG")
+
+giannis = Player("Giannis", "6'11", "PF")
+middleton = Player("Middleton", "6'7", "SF")
+holiday = Player("Holiday", "6'3", "PG")
+lopez = Player("Lopez", "7'0", "C")
+portis = Player("Portis", "6'10", "PF")
+
+# Creating teams
+celtics = Team('Boston', 'Celtics')
+bucks = Team('Milwaukee', 'Bucks')
+
+# Adding players to the Celtics
+celtics.add_player(tatum)
+celtics.add_player(brown)
+celtics.add_player(smart)
+celtics.add_player(horford)
+celtics.add_player(white)
+
+# Adding players to the Bucks
+bucks.add_player(giannis)
+bucks.add_player(middleton)
+bucks.add_player(holiday)
+bucks.add_player(lopez)
+bucks.add_player(portis)
+
+# Simulating game 1 between Celtics and Bucks
+game1 = Game(celtics, bucks)
+game1.sim_game()
+
+# Printing the final score
+print(game1.get_final_score())
+
+# Printing the winning team
+print(f"The winner is: {game1.winner.team_name}")
+print(celtics.record)
+
+# Simulating game 2 between Celtics and Bucks
+game2 = Game(celtics, bucks)
+game2.sim_game()
+
+# Printing the final score
+print(game2.get_final_score())
+
+# Printing the winning team
+print(f"The winner is: {game2.winner.team_name}")
+print(celtics.record)
