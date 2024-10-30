@@ -116,6 +116,7 @@ class Team:
         self.players = []
         self.record = {'W': 0, 'L': 0}
         self.starters = {}
+        self.team_chemistry = 0.5
     
     # add player to roster
     def add_player(self, player):
@@ -142,6 +143,23 @@ class Team:
     def add_loss(self):
         self.record['L'] += 1
 
+    def update_team_chemistry(self):
+        # averaging number of games played by all players on team
+        games_played = sum(player.games_played for player in self.players) / len(self.players) if self.players else 0
+
+        # the closer to 1 the lineup consistency is the more consistent the starting lineup is
+        # creating sets of unique player names in starting lineup
+        lineup_consistency = 1 - (len(set(player.name for player in self.starters.values())) / 5)
+
+# 0.5 + 0.3 * games_played / 50 + 0.2 * lineup_consistency calculates the raw team chemistry.
+    # 0.5: The base chemistry.
+    # 0.3 * games_played / 50: Adds up to 0.3 to chemistry if players have collectively played a high number of games (50 or more on average).
+    # 0.2 * lineup_consistency: Adds up to 0.2 to chemistry if lineup consistency is high.
+# min(1.0, ...): Caps chemistry at 1.0.
+# max(0.1, ...): Ensures chemistry doesn’t fall below 0.1, setting a minimum threshold.
+        
+        self.team_chemistry = max(0.1, min(1.0, 0.5 + 0.3 * games_played / 50 + 0.2 * lineup_consistency))
+
     # add starting 5
     def set_starters(self,starters):
         if len(starters) != 5:
@@ -150,6 +168,7 @@ class Team:
         if len(set(starters.keys())) != 5:
             raise ValueError("Each position must be unique in the starting five")
         self.starters = starters
+        self.update_team_chemistry()
 
     # get starter by position
     def get_starter_by_position(self, position):
@@ -181,11 +200,12 @@ class Game:
         self.score2 = 0
         self.winner = None
 
-    # calculate team strength based on weighted stats
+    # calculate team strength based on weighted stats and chemistry
     def calculate_team_strength(self, team):
         team_stats = team.get_team_stats()
         strength = (team_stats['Points'] * 0.5 + team_stats['Rebounds'] * 0.2 +
                     team_stats['Assists'] * 0.2 + team_stats['Steals'] * 0.1)
+        strength *= team.team_chem
         return strength
 
     # method to sim game
@@ -228,57 +248,3 @@ class Game:
     def get_final_score(self):
         return f"{self.team1.team_name}: {self.score1}, {self.team2.team_name}: {self.score2}"
 
-
-    ## Testing Celtics vs Bucks
-# Creating players
-tatum = Player("Tatum", "6'5", "SF")
-brown = Player("Brown", "6'6", "SG")
-smart = Player("Smart", "6'4", "PG")
-horford = Player("Horford", "6'10", "C")
-white = Player("White", "6'4", "PG")
-
-giannis = Player("Giannis", "6'11", "PF")
-middleton = Player("Middleton", "6'7", "SF")
-holiday = Player("Holiday", "6'3", "PG")
-lopez = Player("Lopez", "7'0", "C")
-portis = Player("Portis", "6'10", "PF")
-
-# Creating teams
-celtics = Team('Boston', 'Celtics')
-bucks = Team('Milwaukee', 'Bucks')
-
-# Adding players to the Celtics
-celtics.add_player(tatum)
-celtics.add_player(brown)
-celtics.add_player(smart)
-celtics.add_player(horford)
-celtics.add_player(white)
-
-# Adding players to the Bucks
-bucks.add_player(giannis)
-bucks.add_player(middleton)
-bucks.add_player(holiday)
-bucks.add_player(lopez)
-bucks.add_player(portis)
-
-# Simulating game 1 between Celtics and Bucks
-game1 = Game(celtics, bucks)
-game1.sim_game()
-
-# Printing the final score
-print(game1.get_final_score())
-
-# Printing the winning team
-print(f"The winner is: {game1.winner.team_name}")
-print(celtics.record)
-
-# Simulating game 2 between Celtics and Bucks
-game2 = Game(celtics, bucks)
-game2.sim_game()
-
-# Printing the final score
-print(game2.get_final_score())
-
-# Printing the winning team
-print(f"The winner is: {game2.winner.team_name}")
-print(celtics.record)
