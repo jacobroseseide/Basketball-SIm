@@ -248,3 +248,44 @@ class Game:
     def get_final_score(self):
         return f"{self.team1.team_name}: {self.score1}, {self.team2.team_name}: {self.score2}"
 
+#------------------ Season Class ---------------------
+import random
+
+class Season:
+    def __init__(self, teams, games_per_matchup=2):
+        self.teams = teams  # List of Team objects participating in the season
+        self.games_per_matchup = games_per_matchup  # Number of games each team plays against each other
+        self.schedule = self.create_schedule()  # List of tuples, each representing a game matchup
+        self.standings = {team.team_name: {'Wins': 0, 'Losses': 0} for team in self.teams}
+
+    def create_schedule(self):
+        # round robin style schedule
+        schedule = []
+        for i, team1 in enumerate(self.teams):
+            for team2 in self.teams[i + 1:]:
+                for _ in range(self.games_per_matchup):
+                    schedule.append((team1, team2))
+        random.shuffle(schedule)  # Randomize game order for more variety
+        return schedule
+
+    def simulate_season(self):
+        for game_no, (team1, team2) in enumerate(self.schedule, start=1):
+            print(f"Simulating Game {game_no}: {team1.team_name} vs {team2.team_name}")
+            game = Game(team1, team2)
+            game.sim_game()
+
+            # Update standings based on the winner
+            if game.winner == team1:
+                self.standings[team1.team_name]['Wins'] += 1
+                self.standings[team2.team_name]['Losses'] += 1
+            else:
+                self.standings[team2.team_name]['Wins'] += 1
+                self.standings[team1.team_name]['Losses'] += 1
+
+    def get_standings(self):
+        # returns sorted list of teams from best to worst record
+        sorted_standings = sorted(self.standings.items(), key=lambda x: x[1]['Wins'], reverse=True)
+        print("Current Standings:")
+        for team, record in sorted_standings:
+            print(f"{team}: {record['Wins']} Wins, {record['Losses']} Losses")
+        return sorted_standings
