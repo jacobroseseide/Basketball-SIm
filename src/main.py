@@ -116,7 +116,7 @@ class Team:
         self.players = []
         self.record = {'W': 0, 'L': 0}
         self.starters = {}
-        self.team_chemistry = 0.5
+        self.team_chem = 0.5
     
     # add player to roster
     def add_player(self, player):
@@ -158,7 +158,7 @@ class Team:
 # min(1.0, ...): Caps chemistry at 1.0.
 # max(0.1, ...): Ensures chemistry doesn’t fall below 0.1, setting a minimum threshold.
         
-        self.team_chemistry = max(0.1, min(1.0, 0.5 + 0.3 * games_played / 50 + 0.2 * lineup_consistency))
+        self.team_chem = max(0.1, min(1.0, 0.5 + 0.3 * games_played / 50 + 0.2 * lineup_consistency))
 
     # add starting 5
     def set_starters(self,starters):
@@ -168,7 +168,7 @@ class Team:
         if len(set(starters.keys())) != 5:
             raise ValueError("Each position must be unique in the starting five")
         self.starters = starters
-        self.update_team_chemistry()
+        self.update_team_chem()
 
     # get starter by position
     def get_starter_by_position(self, position):
